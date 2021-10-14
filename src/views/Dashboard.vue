@@ -1,48 +1,99 @@
 <template>
   <div>
-    <h1>Dashboad</h1>
-    <v-data-table
-      :headers="headers"
-			:items="employees"
-			:items-per-page="5"
-			class="elevation-1"
-			@click:row="selectRow"
-			:multi-sort="true"
-    ></v-data-table>
-		<v-snackbar v-model="snackbar">
-			You have selected {{ selectedEmployee.name }},
-			{{ selectedEmployee.title }}
-			<v-btn color="pink" text @click="snackbar = false">
-				Close
-			</v-btn>
-		</v-snackbar>
+    <v-container>
+      <h1>Dashboard</h1>
+
+      <v-row>
+        <v-col v-for="sale in sales" :key="`${sale.title}`" cols="12" md="4">
+          <SalesGraph :sale="sale" />
+        </v-col>
+      </v-row>
+
+      <v-row>
+        <v-col
+          v-for="statistic in statistics"
+          :key="`${statistic.title}`"
+          cols="12"
+          md="6"
+          lg="3"
+        >
+          <StatisticCard :statistic="statistic" />
+        </v-col>
+      </v-row>
+
+      <v-row>
+        <v-col cols="12" md="8">
+          <EmployeesTable :employees="employees" @select-employee="setEmployee" />
+        </v-col>
+        <v-col cols="12" md="4">
+          <EventTimeline :timeline="timeline" />
+        </v-col>
+      </v-row>
+
+      <v-snackbar v-model="snackbar" :left="$vuetify.breakpoint.lgAndUp">
+        You have selected {{ selectedEmployee.name }},
+        {{ selectedEmployee.title }}
+        <v-btn color="pink" text @click="snackbar = false">
+          Close
+        </v-btn>
+      </v-snackbar>
+    </v-container>
   </div>
 </template>
 <script>
-  import employeesData from '@/data/employees.json'
+import EmployeesTable from '../components/EmployeesTable'
+import EventTimeline from '../components/EventTimeline'
+import SalesGraph from '../components/SalesGraph'
+import StatisticCard from '../components/StatisticCard'
+import employeesData from '../data/employees.json'
+import timelineData from '../data/timeline.json'
+import salesData from '../data/sales.json'
+import statisticsData from '../data/statistics.json'
+
   export default {
     name: 'DashboardPage',
+    components: {
+      EmployeesTable,
+      EventTimeline,
+      SalesGraph,
+      StatisticCard
+    },
     data () {
       return {
+        // isMobile: false,
+        employees: employeesData,
+        sales: salesData,
         selectedEmployee: {
           name: '',
           title: ''
         },
         snackbar: false,
-        headers: [
-          { text: 'Employee ID', value: 'id' },
-          { text: 'Name', value: 'name' },
-          { text: 'Position Title', value: 'title' },
-          { text: 'Salary', value: 'salary' }
-        ],
-        employees: employeesData
+        statistics: statisticsData,
+        timeline: timelineData
       }
     },
+    /* beforeDestroy () {
+      if (typeof window !== 'undefined') {
+        // Remove the resize event when the component is destroyed
+        window.removeEventListener('resize', this.onResize, { passive: true })
+      }
+    },
+    mounted () {
+      // Check whether the user's device is mobile or not
+      this.onResize()
+      // Create resize event to check for mobile device
+      window.addEventListener('resize', this.onResize, { passive: true })
+    }, */
     methods: {
-      selectRow(event) {
-			this.snackbar = true
-			this.selectedEmployee.name = event.name
-			this.selectedEmployee.title = event.title
+      /* onResize () {
+        // Set reactive data property to true
+        // if device is less than 600 pixels
+        this.isMobile = window.innerWidth < 600
+      }, */
+      setEmployee(event) {
+        this.snackbar = true
+        this.selectedEmployee.name = event.name
+        this.selectedEmployee.title = event.title
       }
     }
   }
